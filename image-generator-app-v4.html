@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Imágenes con IA Mejorado</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        #generate {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #generate:hover {
+            background-color: #45a049;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .image-container {
+            width: 45%;
+            margin-bottom: 20px;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .generating-text {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Imágenes con IA Mejorado</h1>
+        <div class="input-group">
+            <label for="prompt">Descripción de la imagen:</label>
+            <input type="text" id="prompt" placeholder="Describe la imagen que quieres generar">
+        </div>
+        <div class="input-group">
+            <label for="negative-prompt">Prompt negativo:</label>
+            <input type="text" id="negative-prompt" placeholder="Elementos a evitar en la imagen" value="blurry, bad, low quality, distorted">
+        </div>
+        <div class="input-group">
+            <label for="steps">Pasos de inferencia:</label>
+            <input type="number" id="steps" min="20" max="50" value="30">
+        </div>
+        <div class="input-group">
+            <label for="guidance">Escala de guía:</label>
+            <input type="number" id="guidance" min="1" max="20" step="0.1" value="7.5">
+        </div>
+        <div class="input-group">
+            <label for="width">Ancho de la imagen:</label>
+            <select id="width">
+                <option value="512">512px</option>
+                <option value="768">768px</option>
+                <option value="1024">1024px</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="height">Alto de la imagen:</label>
+            <select id="height">
+                <option value="512">512px</option>
+                <option value="768">768px</option>
+                <option value="1024">1024px</option>
+            </select>
+        </div>
+        <button id="generate">Generar Imágenes</button>
+        <div id="loading">Generando imágenes... Por favor, espera.</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generate');
+        const promptInput = document.getElementById('prompt');
+        const negativePromptInput = document.getElementById('negative-prompt');
+        const stepsInput = document.getElementById('steps');
+        const guidanceInput = document.getElementById('guidance');
+        const widthSelect = document.getElementById('width');
+        const heightSelect = document.getElementById('height');
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+
+        function enhancePrompt(userPrompt) {
+            const styles = ['photorealistic', 'oil painting', 'watercolor', 'digital art', 'sketch'];
+            const lighting = ['natural light', 'studio lighting', 'dramatic lighting', 'soft light', 'backlight'];
+            const angles = ['front view', 'side view', 'bird\'s eye view', 'low angle shot', 'close-up'];
+
+            const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+            const randomLighting = lighting[Math.floor(Math.random() * lighting.length)];
+            const randomAngle = angles[Math.floor(Math.random() * angles.length)];
+
+            const enhancedPrompt = `${userPrompt}, ${randomStyle}, ${randomLighting}, ${randomAngle}, highly detailed, 8k resolution`;
+            console.log('Prompt completo:', enhancedPrompt);
+            return enhancedPrompt;
+        }
+
+        async function generateImage(prompt, container) {
+            try {
+                const response = await axios.post(
+                    'https://api.segmind.com/v1/sdxl1.0-txt2img',
+                    {
+                        prompt: prompt,
+                        negative_prompt: negativePromptInput.value,
+                        samples: 1,
+                        scheduler: "dpmpp_2m",
+                        num_inference_steps: parseInt(stepsInput.value),
+                        guidance_scale: parseFloat(guidanceInput.value),
+                        seed: -1,  // Usar -1 para semilla aleatoria
+                        img_width: parseInt(widthSelect.value),
+                        img_height: parseInt(heightSelect.value),
+                    },
+                    {
+                        headers: {
+                            'x-api-key': 'SG_cd3cf89fdc57b72b',
+                            'Content-Type': 'application/json',
+                        },
+                        responseType: 'arraybuffer',
+                    }
+                );
+
+                const blob = new Blob([response.data], { type: 'image/png' });
+                const imageUrl = URL.createObjectURL(blob);
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                container.innerHTML = '';
+                container.appendChild(img);
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = 'Error al generar la imagen.';
+            }
+        }
+
+        generateBtn.addEventListener('click', async () => {
+            const userPrompt = promptInput.value;
+            if (!userPrompt) {
+                alert('Por favor, ingresa una descripción para la imagen.');
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+            resultDiv.innerHTML = '';
+
+            const enhancedPrompt = enhancePrompt(userPrompt);
+
+            for (let i = 0; i < 4; i++) {
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+                imageContainer.innerHTML = `
+                    <div>
+                        <div class="spinner"></div>
+                        <div class="generating-text">Generando</div>
+                    </div>
+                `;
+                resultDiv.appendChild(imageContainer);
+
+                // Generar una versión ligeramente diferente del prompt para cada imagen
+                const uniquePrompt = `${enhancedPrompt}, variation ${i + 1}`;
+                generateImage(uniquePrompt, imageContainer);
+            }
+
+            loadingDiv.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

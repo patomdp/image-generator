@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Imágenes con IA</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.3.4/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        #prompt {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #generate {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generador de Imágenes con IA</h1>
+    <input type="text" id="prompt" placeholder="Describe la imagen que quieres generar">
+    <button id="generate">Generar Imagen</button>
+    <div id="loading">Generando imagen...</div>
+    <div id="result"></div>
+
+    <script>
+        const generateBtn = document.getElementById('generate');
+        const promptInput = document.getElementById('prompt');
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+
+        generateBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value;
+            if (!prompt) {
+                alert('Por favor, ingresa una descripción para la imagen.');
+                return;
+            }
+
+            loadingDiv.style.display = 'block';
+            resultDiv.innerHTML = '';
+
+            try {
+                const response = await axios.post(
+                    'https://api.segmind.com/v1/sdxl1.0-txt2img',
+                    {
+                        prompt: prompt,
+                        negative_prompt: "blurry, bad",
+                        samples: 1,
+                        scheduler: "dpmpp_2m",
+                        num_inference_steps: 25,
+                        guidance_scale: 7,
+                        seed: 2414,
+                        img_width: 512,
+                        img_height: 512,
+                    },
+                    {
+                        headers: {
+                            'x-api-key': 'SG_cd3cf89fdc57b72b',
+                            'Content-Type': 'application/json',
+                        },
+                        responseType: 'arraybuffer',
+                    }
+                );
+
+                const blob = new Blob([response.data], { type: 'image/png' });
+                const imageUrl = URL.createObjectURL(blob);
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                resultDiv.appendChild(img);
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.textContent = 'Hubo un error al generar la imagen. Por favor, intenta de nuevo.';
+            } finally {
+                loadingDiv.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
