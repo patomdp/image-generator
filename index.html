@@ -17,19 +17,35 @@
             <input type="text" id="prompt" placeholder="Describe la imagen que quieres generar">
         </div>
         <div class="input-group">
-            <label for="negative-prompt">Prompt negativo:</label>
+            <label for="negative-prompt">Prompt negativo:
+                <span class="tooltip">?
+                    <span class="tooltiptext">Especifica elementos que no deseas que aparezcan en la imagen. Ayuda a evitar características no deseadas.</span>
+                </span>
+            </label>
             <input type="text" id="negative-prompt" placeholder="Elementos a evitar en la imagen" value="blurry, bad, low quality, distorted">
         </div>
         <div class="input-group">
-            <label for="steps">Pasos de inferencia:</label>
+            <label for="steps">Pasos de inferencia:
+                <span class="tooltip">?
+                    <span class="tooltiptext">Controla cuántas veces se refina la imagen. Más pasos pueden resultar en más detalles, pero también aumentan el tiempo de generación.</span>
+                </span>
+            </label>
             <input type="number" id="steps" min="20" max="50" value="30">
         </div>
         <div class="input-group">
-            <label for="guidance">Escala de guía:</label>
+            <label for="guidance">Escala de guía:
+                <span class="tooltip">?
+                    <span class="tooltiptext">Determina cuánto se adhiere la imagen al prompt. Valores más altos producen imágenes más fieles al prompt, pero pueden ser menos creativas.</span>
+                </span>
+            </label>
             <input type="number" id="guidance" min="1" max="20" step="0.1" value="7.5">
         </div>
         <div class="input-group">
-            <label for="width">Ancho de la imagen:</label>
+            <label for="width">Ancho de la imagen:
+                <span class="tooltip">?
+                    <span class="tooltiptext">Define el ancho de la imagen generada en píxeles. Resoluciones más altas pueden producir más detalles pero tardan más en generarse.</span>
+                </span>
+            </label>
             <select id="width">
                 <option value="512">512px</option>
                 <option value="768">768px</option>
@@ -37,13 +53,18 @@
             </select>
         </div>
         <div class="input-group">
-            <label for="height">Alto de la imagen:</label>
+            <label for="height">Alto de la imagen:
+                <span class="tooltip">?
+                    <span class="tooltiptext">Define el alto de la imagen generada en píxeles. Resoluciones más altas pueden producir más detalles pero tardan más en generarse.</span>
+                </span>
+            </label>
             <select id="height">
                 <option value="512">512px</option>
                 <option value="768">768px</option>
                 <option value="1024">1024px</option>
             </select>
         </div>
+        
         <button id="generate">Generar Imágenes</button>
         <div id="loading">Generando imágenes... Por favor, espera.</div>
         <div id="result"></div>
