@@ -1,5 +1,7 @@
 // style-transfer.js
-const backendUrl = 'https://image-generator-backend-obj1.onrender.com/api/transform-style';
+const backendUrl = 'https://image-generator-backend-obj1.onrender.com';
+const transformStyleAPI = '/api/transform-style';
+const imageGeneratorAPI = '/api/image-generator';
 
 function resizeImage(file, maxWidth, maxHeight, callback) {
     const reader = new FileReader();
@@ -62,7 +64,7 @@ document.getElementById('transform-btn').addEventListener('click', async () => {
             const imageContainer = document.createElement('div');
             // 'http://localhost:5000/api/transform-style'
             try {
-                const response = await fetch(backendUrl, {
+                const response = await fetch(backendUrl+transformStyleAPI, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
