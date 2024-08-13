@@ -1,3 +1,4 @@
+// index.js
 const generateBtn = document.getElementById('generate');
 const promptInput = document.getElementById('prompt');
 const negativePromptInput = document.getElementById('negative-prompt');
@@ -8,6 +9,44 @@ const heightSelect = document.getElementById('height');
 const resultDiv = document.getElementById('result');
 const loadingDiv = document.getElementById('loading');
 
+const backendUrl = 'https://image-generator-backend-obj1.onrender.com/api/transform-style';
+
+
+// Función para redimensionar la imagen
+function resizeImage(file, maxWidth, maxHeight, callback) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = function(event) {
+        const img = new Image();
+        img.src = event.target.result;
+
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > maxWidth) {
+                    height *= maxWidth / width;
+                    width = maxWidth;
+                }
+            } else {
+                if (height > maxHeight) {
+                    width *= maxHeight / height;
+                    height = maxHeight;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            callback(canvas.toDataURL(file.type));
+        };
+    };
+}
 
 function enhancePrompt(userPrompt, index) {
     const styles = ['photorealistic', 'oil painting', 'watercolor', 'digital art', 'sketch', 'anime style', 'pop art', 'impressionist', 'surrealist', 'minimalist'];
@@ -47,31 +86,23 @@ function enhancePrompt(userPrompt, index) {
     return enhancedPrompt;
 }
 
-async function generateImage(prompt, container) {
+async function generateImage(prompt, container, resizedImageBase64) {
     try {
-        const response = await axios.post(
-            'https://api.segmind.com/v1/sdxl1.0-txt2img',
-            {
+        const response = await fetch(backendUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
                 prompt: prompt,
                 negative_prompt: negativePromptInput.value,
-                samples: 1,
-                scheduler: "dpmpp_2m",
-                num_inference_steps: parseInt(stepsInput.value),
-                guidance_scale: parseFloat(guidanceInput.value),
-                seed: -1,  // Usar -1 para semilla aleatoria
                 img_width: parseInt(widthSelect.value),
                 img_height: parseInt(heightSelect.value),
-            },
-            {
-                headers: {
-                    'x-api-key': 'SG_cd3cf89fdc57b72b',
-                    'Content-Type': 'application/json',
-                },
-                responseType: 'arraybuffer',
-            }
-        );
-
-        const blob = new Blob([response.data], { type: 'image/png' });
+                imageBase64: resizedImageBase64.split(',')[1], // Enviar solo la parte base64
+            }),
+        });
+        const blob = await response.blob();
+        // const blob = new Blob([response.data], { type: 'image/png' });
         const imageUrl = URL.createObjectURL(blob);
         const img = document.createElement('img');
         img.src = imageUrl;
@@ -83,30 +114,65 @@ async function generateImage(prompt, container) {
     }
 }
 
-generateBtn.addEventListener('click', async () => {
+generateBtn.addEventListener('click', () => {
     const userPrompt = promptInput.value;
     if (!userPrompt) {
         alert('Por favor, ingresa una descripción para la imagen.');
         return;
     }
 
+    if (!imageInput.files.length) {
+        alert('Por favor, sube una imagen.');
+        return;
+    }
+
     loadingDiv.style.display = 'block';
     resultDiv.innerHTML = '';
 
-    for (let i = 0; i < 4; i++) {
-        const imageContainer = document.createElement('div');
-        imageContainer.className = 'image-container';
-        imageContainer.innerHTML = `
-            <div>
-                <div class="spinner"></div>
-                <div class="generating-text">Generando</div>
-            </div>
-        `;
-        resultDiv.appendChild(imageContainer);
+    resizeImage(imageInput.files[0], 512, 512, async function(resizedImageBase64) {
+        for (let i = 0; i < 4; i++) {
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'image-container';
+            imageContainer.innerHTML = `
+                <div>
+                    <div class="spinner"></div>
+                    <div class="generating-text">Generando</div>
+                </div>
+            `;
+            resultDiv.appendChild(imageContainer);
 
-        const enhancedPrompt = enhancePrompt(userPrompt, i);
-        generateImage(enhancedPrompt, imageContainer);
-    }
+            const enhancedPrompt = enhancePrompt(userPrompt, i);
+            await generateImage(enhancedPrompt, imageContainer, resizedImageBase64);
+        }
 
-    loadingDiv.style.display = 'none';
+        loadingDiv.style.display = 'none';
+    });
 });
+
+// generateBtn.addEventListener('click', async () => {
+//     const userPrompt = promptInput.value;
+//     if (!userPrompt) {
+//         alert('Por favor, ingresa una descripción para la imagen.');
+//         return;
+//     }
+
+//     loadingDiv.style.display = 'block';
+//     resultDiv.innerHTML = '';
+
+//     for (let i = 0; i < 4; i++) {
+//         const imageContainer = document.createElement('div');
+//         imageContainer.className = 'image-container';
+//         imageContainer.innerHTML = `
+//             <div>
+//                 <div class="spinner"></div>
+//                 <div class="generating-text">Generando</div>
+//             </div>
+//         `;
+//         resultDiv.appendChild(imageContainer);
+
+//         const enhancedPrompt = enhancePrompt(userPrompt, i);
+//         generateImage(enhancedPrompt, imageContainer);
+//     }
+
+//     loadingDiv.style.display = 'none';
+// });
