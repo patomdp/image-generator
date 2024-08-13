@@ -1,5 +1,5 @@
 // style-transfer.js
-const backendUrl = 'https://image-generator-backend-obj1.onrender.com';
+const backendUrl = 'https://image-generator-backend-obj1.onrender.com/api/transform-style';
 
 function resizeImage(file, maxWidth, maxHeight, callback) {
     const reader = new FileReader();
