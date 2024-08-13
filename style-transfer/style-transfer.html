@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformación de Estilos con Segmind</title>
+    <link rel="stylesheet" href="/style-transfer/style-transfer.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Transformación de Estilos</h1>
+        <div class="form-group">
+            <label for="image-upload">Subir Imagen:</label>
+            <input type="file" id="image-upload" accept="image/*">
+        </div>
+        <div class="form-group">
+            <label for="prompt">Descripción (Prompt):</label>
+            <input type="text" id="prompt" placeholder="Descripción de la imagen...">
+        </div>
+        <div class="form-group">
+            <label for="style-select">Seleccionar Estilo:</label>
+            <select id="style-select">
+                <option value="photorealistic">Photorealistic</option>
+                <option value="oil painting">Oil Painting</option>
+                <option value="watercolor">Watercolor</option>
+                <option value="digital art">Digital Art</option>
+                <option value="sketch">Sketch</option>
+                <!-- Otros estilos que desees incluir -->
+            </select>
+        </div>
+        <button id="transform-btn">Transformar</button>
+        
+        <div id="results" class="results"></div>
+    </div>
+
+    <script src="/style-transfer/style-transfer.js"></script>
+</body>
+</html>
