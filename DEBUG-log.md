@@ -231,3 +231,13 @@ Mostrará los prompts completos en la consola del navegador para que puedas ver 
 Generará cuatro imágenes basadas en estos prompts diversos.
 
 Esta implementación debería producir resultados mucho más variados entre sí, manteniendo al mismo tiempo la esencia de tu idea original. ¿Hay algo más que te gustaría ajustar o alguna otra característica que quieras añadir a la aplicación?
+
+### V6:
+
+En esta version:
+- abrí repositorio para backend
+- configuré el archivo 'server.js'
+- subí el backend a [https://dashboard.render.com/](https://dashboard.render.com/)
+- cambié las API Keys a '.env'
+- instalé express, axios y cors
+- Actualicé el Front para conectarse con este nuevo Back desplegado [https://image-generator-backend-obj1.onrender.com/api/image-generator](https://image-generator-backend-obj1.onrender.com/api/image-generator)
