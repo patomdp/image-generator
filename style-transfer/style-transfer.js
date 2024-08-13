@@ -131,7 +131,7 @@ document.getElementById('transform-btn').addEventListener('click', async () => {
 //                 const response = await fetch('http://localhost:5000/api/transform-style', {
 //                     method: 'POST',
 //                     headers: {
-//                         // 'x-api-key': 'SG_cd3cf89fdc57b72b', // Reemplaza con tu clave API
+//                         // // // Reemplaza con tu clave API
 //                         'Content-Type': 'application/json',
 //                     },
 //                     body: JSON.stringify({
